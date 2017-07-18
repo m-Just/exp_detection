@@ -6,9 +6,9 @@ import tensorflow as tf
 import numpy as np
 
 from networks import text_objseg_model as segmodel
-from util import data_reader
-from util import loss
-from util import rcnn
+from utils import data_reader
+from utils import loss
+from utils import rcnn
 
 ################################################################################
 # Parameters

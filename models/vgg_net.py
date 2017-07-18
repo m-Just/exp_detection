@@ -5,11 +5,11 @@ import tensorflow as tf
 
 # components
 from tensorflow.python.ops.nn import dropout as drop
-from util.cnn import conv_layer as conv
-from util.cnn import conv_relu_layer as conv_relu
-from util.cnn import pooling_layer as pool
-from util.cnn import fc_layer as fc
-from util.cnn import fc_relu_layer as fc_relu
+from utils.cnn import conv_layer as conv
+from utils.cnn import conv_relu_layer as conv_relu
+from utils.cnn import pooling_layer as pool
+from utils.cnn import fc_layer as fc
+from utils.cnn import fc_relu_layer as fc_relu
 
 channel_mean = np.array([123.68, 116.779, 103.939], dtype=np.float32)
 

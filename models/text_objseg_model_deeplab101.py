@@ -4,11 +4,11 @@ import tensorflow as tf
 import numpy as np
 
 from tensorflow.python.ops.nn import dropout as drop
-from util.cnn import conv_layer as conv
-from util.cnn import conv_relu_layer as conv_relu
-from util.cnn import deconv_layer as deconv
-from util.cnn import fc_layer as fc
-from util.cnn import fc_relu_layer as fc_relu
+from utils.cnn import conv_layer as conv
+from utils.cnn import conv_relu_layer as conv_relu
+from utils.cnn import deconv_layer as deconv
+from utils.cnn import fc_layer as fc
+from utils.cnn import fc_relu_layer as fc_relu
 from models import lstm_net
 from models.processing_tools import *
 from deeplab_resnet import model as deeplab101

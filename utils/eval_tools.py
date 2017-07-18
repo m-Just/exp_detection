@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 import pyximport; pyximport.install()
-from util.nms import cpu_nms as nms
+from utils.nms import cpu_nms as nms
 
 # all boxes are [xmin, ymin, xmax, ymax] format, 0-indexed, including xmax and ymax
 def compute_bbox_iou(bboxes, target):

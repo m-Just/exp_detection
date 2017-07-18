@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import tensorflow as tf
 
-from util.rnn import lstm_layer as lstm
+from utils.rnn import lstm_layer as lstm
 
 def lstm_net(text_seq_batch, num_vocab, embed_dim, lstm_dim):
     # embedding matrix with each row containing the embedding vector of a word
