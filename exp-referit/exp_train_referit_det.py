@@ -24,7 +24,7 @@ rpn_feat_dim = 512
 is_bn_training = False
 
 # Initialization Params
-pretrained_params = '../tensorflow-deeplab-resnet/models/deeplab_resnet_init.ckpt'
+pretrained_params = '../deeplab_resnet/models/deeplab_resnet_init.ckpt'
 
 # Training Params
 pos_loss_mult = 1.
