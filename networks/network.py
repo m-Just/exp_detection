@@ -11,12 +11,12 @@ def layer(op):
         # Automatically set a name if not provided.
         name = kwargs.setdefault('name', self.get_unique_name(op.__name__))
         # Figure out the layer inputs.
-        if len(self.terminals) == 0:
+        if len(self.inputs) == 0:
             raise RuntimeError('No input variables found for layer %s.' % name)
-        elif len(self.terminals) == 1:
-            layer_input = self.terminals[0]
+        elif len(self.inputs) == 1:
+            layer_input = self.inputs[0]
         else:
-            layer_input = list(self.terminals)
+            layer_input = list(self.inputs)
         # Perform the operation and get the output.
         layer_output = op(self, layer_input, *args, **kwargs)
         # Add to layer LUT.
@@ -66,21 +66,18 @@ class Network(object):
                             raise
 
     def feed(self, *args):
-        '''Set the input(s) for the next operation by replacing the terminal nodes.
-        The arguments can be either layer names or the actual layers.
-        '''
         assert len(args) != 0
-        self.terminals = [] # TODO
+        self.inputs = [] # TODO
         for fed_layer in args:
             if isinstance(fed_layer, basestring):
                 try:
                     fed_layer = self.layers[fed_layer]
                 except KeyError:
                     raise KeyError('Unknown layer name fed: %s' % fed_layer)
-                self.terminals.append(fed_layer)
+                self.inputs.append(fed_layer)
         return self
 
-    def get_output(self):
+    def get_output(self):   # TODO
         '''Returns the current network output.'''
         return self.terminals[-1]
 
