@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import argparse
 import sys
 import os
 import tensorflow as tf
@@ -31,11 +32,14 @@ pos_loss_mult = 1.
 neg_loss_mult = 1.
 
 start_lr = 0.01
+end_lr = 0.00001
 lr_decay_step = 10000
 lr_decay_rate = 0.1
 weight_decay = 0.0005
 momentum = 0.9
 max_iter = 25000
+
+deeplab_lr_mult = 0.1
 
 fix_convnet = True
 vgg_dropout = False
