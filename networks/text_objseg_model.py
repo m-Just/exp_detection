@@ -24,7 +24,7 @@ def text_objseg_region(text_seq_batch, imcrop_batch, spatial_batch,
     feat_lang = lstm_net.lstm_net(text_seq_batch, num_vocab, embed_dim, lstm_dim)
 
     # deeplab101
-    resnet = DeepLabResNetModel({'data': imcrop_batch},
+    resnet = DeepLabResNetModel({'data': imcrop_batch}, 
         is_training=is_training, num_classes=embed_dim)
     feat_vis = resnet.layers['fc1_voc12']
 
