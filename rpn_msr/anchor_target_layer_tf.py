@@ -227,8 +227,7 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride=[16,], an
 
     rpn_bbox_outside_weights = bbox_outside_weights
 
-    return rpn_labels, rpn_bbox_targets, rpn_bbox_inside_weights,
-        rpn_bbox_outside_weights
+    return rpn_labels, rpn_bbox_targets, rpn_bbox_inside_weights, rpn_bbox_outside_weights
 
 def _unmap(data, count, inds, fill=0):
     """ Unmap a subset of item (data) back to the original set of items (of
