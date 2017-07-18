@@ -112,6 +112,10 @@ else: # also train the conv5_x layers
                         or var.name.startswith('res5') or var.name.startswith('bn5')
                         or var.name.startswith('rpn')]
                         # TODO check if all rpn layers name starts with rpn
+print('Collecting variables to train:')
+for var in train_var_list:
+    print('\t%s' % var.name)
+print('Done.')
 
 # Add regularization to weight matrices (excluding bias)
 # TODO confirm if rpn weights should be regularized
@@ -218,7 +222,7 @@ for n_iter in range(args.max_iter):
 
     # Forward and Backward pass
     scores_val, rpn_loss_val, _, lr_val = \
-    sess.run([scores, rpn_loss_box, train_step, learning_rate], feed_dict=feed_dict)
+    sess.run([net, rpn_loss_box, train_step, learning_rate], feed_dict=feed_dict)
 
     rpn_loss_avg = decay * rpn_loss_avg + (1 - decay) * rpn_loss_val
     print('\titer = %d, rpn_reg_loss (cur) = %f, rpn_reg_loss (avg) = %f, lr = %f'
