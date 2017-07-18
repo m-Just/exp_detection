@@ -7,15 +7,12 @@ _feat_stride = [16,]
 anchor_scales = [8, 16, 32]
 
 class RPN(Network):
-    def __init__(self, feat_name, feat_dim, trainable=True):
+    def __init__(self, inputs, feat_name, feat_dim, trainable=True):
         self.inputs = []
+        self.layers = dict(inputs)
         self.im_info = tf.placeholder(tf.float32, shape=[None, 3])
         self.gt_boxes = tf.placeholder(tf.float32, shape=[None, 5])
         self.keep_prob = tf.placeholder(tf.float32)
-        self.layers = {
-            'im_info': self.im_info,
-            'gt_boxes': self.gt_boxes
-        }
 
         self.feat_name = feat_name
         self.feat_dim = feat_dim

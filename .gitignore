@@ -4,3 +4,5 @@ exp-referit/init_referit_seg_lowres_deeplab101.py
 exp-referit/exp_train_referit_seg_lowres_deeplab101.py
 exp-referit/exp_train_referit_det_original.py
 exp-referit/faster_rcnn_train.py
+*.ckpt
+*.tfmodel

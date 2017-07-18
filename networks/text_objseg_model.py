@@ -16,8 +16,9 @@ from deeplab_resnet.model import DeepLabResNetModel
 
 IMG_MEAN = np.array((104.00698793,116.66876762,122.67891434), dtype=np.float32)
 
-def text_objseg_region(text_seq_batch, imcrop_batch, spatial_batch, num_vocab,
-    embed_dim, lstm_dim, rpn_feat_dim, mlp_dropout, is_training):
+def text_objseg_region(text_seq_batch, imcrop_batch, spatial_batch,
+    imsize_batch, gt_box_batch, num_vocab, embed_dim, lstm_dim, rpn_feat_dim,
+    mlp_dropout, is_training):
 
     # Language feature (LSTM hidden state)
     feat_lang = lstm_net.lstm_net(text_seq_batch, num_vocab, embed_dim, lstm_dim)
@@ -44,7 +45,8 @@ def text_objseg_region(text_seq_batch, imcrop_batch, spatial_batch, num_vocab,
                               # TODO test for different output dim
 
     # feed feature maps to RPN
-    rpn_net = RPN('feat_all_conv', rpn_feat_dim, trainable=True)
+    rpn_net = RPN({'gt_boxes': gt_box_batch, 'im_info': imsize_batch},
+        'feat_all_conv', rpn_feat_dim, trainable=True)
 
     # MLP Classifier over concatenate feature
     # with tf.variable_scope('classifier'):

@@ -84,13 +84,12 @@ imcrop_batch = tf.placeholder(tf.float32, [N, 224, 224, 3])
 spatial_batch = tf.placeholder(tf.float32, [N, 8])
 label_batch = tf.placeholder(tf.float32, [N, 1])
 imsize_batch = tf.placeholder(tf.float32, [N, 2])
-imsize_batch = tf.placeholder(tf.float32, [N, 2])
 gt_box_batch = tf.placeholder(tf.float32, [N, 5])
 
 # Outputs
 net = segmodel.text_objseg_region(text_seq_batch, imcrop_batch,
-    spatial_batch, num_vocab, embed_dim, lstm_dim, rpn_feat_dim,
-    vgg_dropout=vgg_dropout, mlp_dropout=mlp_dropout)
+    spatial_batch, imsize_batch, gt_box_batch, num_vocab, embed_dim,
+    lstm_dim, rpn_feat_dim, vgg_dropout=vgg_dropout, mlp_dropout=mlp_dropout)
 
 ################################################################################
 # Collect trainable variables, regularized variables and learning rates
