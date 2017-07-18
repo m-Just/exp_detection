@@ -7,15 +7,30 @@
 
 import os
 import yaml
-from fast_rcnn.config import cfg
 import numpy as np
 import numpy.random as npr
 from generate_anchors import generate_anchors
 from utils.cython_bbox import bbox_overlaps
-from fast_rcnn.bbox_transform import bbox_transform
 import pdb
 
 DEBUG = False
+
+# A small number that's used many times
+EPS = 1e-14
+# If an anchor statisfied by positive and negative conditions set to negative
+RPN_CLOBBER_POSITIVES = False
+# IOU < thresh: negative example
+RPN_NEGATIVE_OVERLAP = 0.3
+# IOU >= thresh: positive example
+RPN_POSITIVE_OVERLAP = 0.7
+# Max number of foreground examples
+RPN_FG_FRACTION = 0.5
+# Total number of examples
+RPN_BATCHSIZE = 256
+# Deprecated (outside weights)
+RPN_BBOX_INSIDE_WEIGHTS = (1.0, 1.0, 1.0, 1.0)
+# Set to -1.0 to use uniform example weighting
+RPN_POSITIVE_WEIGHT = -1.0
 
 def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride=[16,], anchor_scales=[4, 8, 16, 32]):
     """
@@ -33,7 +48,7 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride=[16,], an
             _anchors[:, 2::4] - _anchors[:, 0::4],
             _anchors[:, 3::4] - _anchors[:, 1::4],
         ))
-        _counts = cfg.EPS
+        _counts = EPS
         _sums = np.zeros((1, 4))
         _squared_sums = np.zeros((1, 4))
         _fg_sum = 0
@@ -119,22 +134,22 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride=[16,], an
                                np.arange(overlaps.shape[1])]
     gt_argmax_overlaps = np.where(overlaps == gt_max_overlaps)[0]
 
-    if not cfg.TRAIN.RPN_CLOBBER_POSITIVES:
+    if not RPN_CLOBBER_POSITIVES:
         # assign bg labels first so that positive labels can clobber them
-        labels[max_overlaps < cfg.TRAIN.RPN_NEGATIVE_OVERLAP] = 0
+        labels[max_overlaps < RPN_NEGATIVE_OVERLAP] = 0
 
     # fg label: for each gt, anchor with highest overlap
     labels[gt_argmax_overlaps] = 1
 
     # fg label: above threshold IOU
-    labels[max_overlaps >= cfg.TRAIN.RPN_POSITIVE_OVERLAP] = 1
+    labels[max_overlaps >= RPN_POSITIVE_OVERLAP] = 1
 
-    if cfg.TRAIN.RPN_CLOBBER_POSITIVES:
+    if RPN_CLOBBER_POSITIVES:
         # assign bg labels last so that negative labels can clobber positives
-        labels[max_overlaps < cfg.TRAIN.RPN_NEGATIVE_OVERLAP] = 0
+        labels[max_overlaps < RPN_NEGATIVE_OVERLAP] = 0
 
     # subsample positive labels if we have too many
-    num_fg = int(cfg.TRAIN.RPN_FG_FRACTION * cfg.TRAIN.RPN_BATCHSIZE)
+    num_fg = int(RPN_FG_FRACTION * RPN_BATCHSIZE)
     fg_inds = np.where(labels == 1)[0]
     if len(fg_inds) > num_fg:
         disable_inds = npr.choice(
@@ -142,7 +157,7 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride=[16,], an
         labels[disable_inds] = -1
 
     # subsample negative labels if we have too many
-    num_bg = cfg.TRAIN.RPN_BATCHSIZE - np.sum(labels == 1)
+    num_bg = RPN_BATCHSIZE - np.sum(labels == 1)
     bg_inds = np.where(labels == 0)[0]
     if len(bg_inds) > num_bg:
         disable_inds = npr.choice(
@@ -155,20 +170,20 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride=[16,], an
     bbox_targets = _compute_targets(anchors, gt_boxes[argmax_overlaps, :])
 
     bbox_inside_weights = np.zeros((len(inds_inside), 4), dtype=np.float32)
-    bbox_inside_weights[labels == 1, :] = np.array(cfg.TRAIN.RPN_BBOX_INSIDE_WEIGHTS)
+    bbox_inside_weights[labels == 1, :] = np.array(RPN_BBOX_INSIDE_WEIGHTS)
 
     bbox_outside_weights = np.zeros((len(inds_inside), 4), dtype=np.float32)
-    if cfg.TRAIN.RPN_POSITIVE_WEIGHT < 0:
+    if RPN_POSITIVE_WEIGHT < 0:
         # uniform weighting of examples (given non-uniform sampling)
         num_examples = np.sum(labels >= 0)
         positive_weights = np.ones((1, 4)) * 1.0 / num_examples
         negative_weights = np.ones((1, 4)) * 1.0 / num_examples
     else:
-        assert ((cfg.TRAIN.RPN_POSITIVE_WEIGHT > 0) &
-                (cfg.TRAIN.RPN_POSITIVE_WEIGHT < 1))
-        positive_weights = (cfg.TRAIN.RPN_POSITIVE_WEIGHT /
+        assert ((RPN_POSITIVE_WEIGHT > 0) &
+                (RPN_POSITIVE_WEIGHT < 1))
+        positive_weights = (RPN_POSITIVE_WEIGHT /
                             np.sum(labels == 1))
-        negative_weights = ((1.0 - cfg.TRAIN.RPN_POSITIVE_WEIGHT) /
+        negative_weights = ((1.0 - RPN_POSITIVE_WEIGHT) /
                             np.sum(labels == 0))
     bbox_outside_weights[labels == 1, :] = positive_weights
     bbox_outside_weights[labels == 0, :] = negative_weights
@@ -242,6 +257,25 @@ def _unmap(data, count, inds, fill=0):
         ret[inds, :] = data
     return ret
 
+def bbox_transform(ex_rois, gt_rois):
+    ex_widths = ex_rois[:, 2] - ex_rois[:, 0] + 1.0
+    ex_heights = ex_rois[:, 3] - ex_rois[:, 1] + 1.0
+    ex_ctr_x = ex_rois[:, 0] + 0.5 * ex_widths
+    ex_ctr_y = ex_rois[:, 1] + 0.5 * ex_heights
+
+    gt_widths = gt_rois[:, 2] - gt_rois[:, 0] + 1.0
+    gt_heights = gt_rois[:, 3] - gt_rois[:, 1] + 1.0
+    gt_ctr_x = gt_rois[:, 0] + 0.5 * gt_widths
+    gt_ctr_y = gt_rois[:, 1] + 0.5 * gt_heights
+
+    targets_dx = (gt_ctr_x - ex_ctr_x) / ex_widths
+    targets_dy = (gt_ctr_y - ex_ctr_y) / ex_heights
+    targets_dw = np.log(gt_widths / ex_widths)
+    targets_dh = np.log(gt_heights / ex_heights)
+
+    targets = np.vstack(
+        (targets_dx, targets_dy, targets_dw, targets_dh)).transpose()
+    return targets
 
 def _compute_targets(ex_rois, gt_rois):
     """Compute bounding-box regression targets for an image."""
