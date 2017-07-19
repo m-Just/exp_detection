@@ -4,7 +4,7 @@
 # the slim library (https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim).
 
 import tensorflow as tf
-from networks.network import Network
+from networks import Network
 
 class DeepLabResNetModel(Network):
     def setup(self, is_training, num_classes):
