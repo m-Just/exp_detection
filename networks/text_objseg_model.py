@@ -24,20 +24,22 @@ def text_objseg_region(text_seq_batch, imcrop_batch, spatial_batch,
     feat_lang = lstm_net.lstm_net(text_seq_batch, num_vocab, embed_dim, lstm_dim)
 
     # deeplab101
-    resnet = DeepLabResNetModel({'data': imcrop_batch}, 
+    resnet = DeepLabResNetModel({'data': imcrop_batch},
         is_training=is_training, num_classes=embed_dim)
     feat_vis = resnet.layers['fc1_voc12']
 
-    # mean pooling
-    batch_size, featmap_H, featmap_W = feat_vis.get_shape().as_list()[0:3]
-    feat_vis_ave = tf.contrib.layers.avg_pool2d(feat_vis, [featmap_H, featmap_W], 1)
-    feat_vis_reshape = tf.reshape(feat_vis_ave, [batch_size, embed_dim])
+    # Reshape and tile LSTM top
+    featmap_H, featmap_W = feat_vis.get_shape().as_list()[1:3]
+    N, D_text = feat_lang.get_shape().as_list()
+    feat_lang = tf.tile(tf.reshape(feat_lang, [N, 1, 1, D_text]),
+        [1, featmap_H, featmap_W, 1])
 
     # L2-normalize the features (except for spatial_batch)
-    # and concatenate them
+    # and concatenate them along axis 3 (channel dimension)
+    spatial_batch = tf.convert_to_tensor(generate_spatial_batch(N, featmap_H, featmap_W))
     feat_all = tf.concat(values=[tf.nn.l2_normalize(feat_lang, 1),
                                  tf.nn.l2_normalize(feat_vis_reshape, 1),
-                                 spatial_batch], axis=1)
+                                 spatial_batch], axis=3)
 
     # conv all feats as RPN input
     feat_all_conv = conv_relu('feat_all_conv', feat_all,
