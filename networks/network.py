@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from rpn_msr.anchor_target_layer_tf import anchor_target_layer as anchor_target_layer_py
+slim = tf.contrib.slim
 
 DEFAULT_PADDING = 'SAME'
 
@@ -44,7 +45,7 @@ class Network(object):
                                                        name='use_dropout')  # TODO
         self.setup(is_training, num_classes)
 
-    def setup(self):
+    def setup(self, is_training):
         '''Construct the network. '''
         raise NotImplementedError('Must be implemented by the subclass.')
 
