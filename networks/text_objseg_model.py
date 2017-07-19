@@ -42,7 +42,7 @@ def text_objseg_region(text_seq_batch, imcrop_batch, spatial_batch,
                                  spatial_batch], axis=3)
 
     # conv all feats as RPN input
-    feat_all_conv = conv_relu(name='feat_all_conv', feat_all,
+    feat_all_conv = conv_relu('feat_all_conv', feat_all,
                               kernel_size=3, stride=1, output_dim=rpn_feat_dim)
                               # TODO test for different output dim
 
