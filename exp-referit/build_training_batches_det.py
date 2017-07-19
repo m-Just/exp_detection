@@ -32,7 +32,7 @@ neg_iou = 1e-6
 neg_to_pos_ratio = 1.0
 
 # Model Param
-N = 10
+N = 1
 T = 20
 input_H = 320
 input_W = 320
