@@ -32,8 +32,10 @@ neg_iou = 1e-6
 neg_to_pos_ratio = 1.0
 
 # Model Param
-N = 50
+N = 10
 T = 20
+input_H = 320
+input_W = 320
 
 ################################################################################
 # Load annotations and bounding box proposals
@@ -121,7 +123,7 @@ print('total batch number: %d' % num_batch)
 ################################################################################
 
 text_seq_batch = np.zeros((T, N), dtype=np.int32)
-imcrop_batch = np.zeros((N, 224, 224, 3), dtype=np.uint8)
+imcrop_batch = np.zeros((N, input_H, input_W, 3), dtype=np.uint8)
 spatial_batch = np.zeros((N, 8), dtype=np.float32)
 label_batch = np.zeros((N, 1), dtype=np.bool)
 imsize_batch = np.zeros((N, 2), dtype=np.float32)
@@ -139,7 +141,7 @@ for n_batch in range(num_batch):
         xmin, ymin, xmax, ymax = sample_bbox
 
         imcrop = im[ymin:ymax+1, xmin:xmax+1, :]
-        imcrop = skimage.img_as_ubyte(skimage.transform.resize(imcrop, [224, 224]))
+        imcrop = skimage.img_as_ubyte(skimage.transform.resize(imcrop, [input_H, input_W]))
         spatial_feat = processing_tools.spatial_feature_from_bbox(sample_bbox, imsize)
         text_seq = text_processing.preprocess_sentence(description, vocab_dict, T)
 

@@ -23,6 +23,8 @@ embed_dim = 1000
 lstm_dim = 1000
 rpn_feat_dim = 512
 is_bn_training = False
+input_H = 320
+input_W = 320
 
 # Initialization Params
 pretrained_params = '../deeplab_resnet/models/deeplab_resnet_init.ckpt'
@@ -84,7 +86,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
 # Inputs
 text_seq_batch = tf.placeholder(tf.int32, [T, N])
-imcrop_batch = tf.placeholder(tf.float32, [N, 224, 224, 3])
+imcrop_batch = tf.placeholder(tf.float32, [N, input_H, input_W, 3])
 spatial_batch = tf.placeholder(tf.float32, [N, 8])
 label_batch = tf.placeholder(tf.float32, [N, 1])
 imsize_batch = tf.placeholder(tf.float32, [N, 2])
