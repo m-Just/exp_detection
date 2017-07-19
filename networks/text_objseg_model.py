@@ -50,6 +50,8 @@ def text_objseg_region(text_seq_batch, imcrop_batch, spatial_batch,
     rpn_net = RPN({'gt_boxes': gt_box_batch, 'im_info': imsize_batch},
         feat_all_conv, rpn_feat_dim, trainable=True)
 
+    return rpn_net
+
     # MLP Classifier over concatenate feature
     # with tf.variable_scope('classifier'):
     #     mlp_l1 = fc_relu('mlp_l1', feat_all, output_dim=mlp_hidden_dims)
