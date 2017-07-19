@@ -78,7 +78,7 @@ class Network(object):
                     fed_layer = self.layers[fed_layer]
                 except KeyError:
                     raise KeyError('Unknown layer name fed: %s' % fed_layer)
-                self.terminals.append(fed_layer)
+            self.terminals.append(fed_layer)
         return self
 
     def get_output(self):   # TODO resnet and rpn use different get_output
