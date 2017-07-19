@@ -1,9 +1,9 @@
 import numpy as np
 
-from ..errors import KaffeError, print_stderr
-from ..graph import GraphBuilder, NodeMapper
-from ..layers import NodeKind
-from ..transformers import (DataInjector, DataReshaper, NodeRenamer, ReLUFuser,
+from errors import KaffeError, print_stderr
+from graph import GraphBuilder, NodeMapper
+from layers import NodeKind
+from transformers import (DataInjector, DataReshaper, NodeRenamer, ReLUFuser,
                             BatchNormScaleBiasFuser, BatchNormPreprocessor, ParameterNamer)
 
 from . import network
