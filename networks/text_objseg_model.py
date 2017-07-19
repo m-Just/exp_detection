@@ -37,8 +37,8 @@ def text_objseg_region(text_seq_batch, imcrop_batch, spatial_batch,
     # L2-normalize the features (except for spatial_batch)
     # and concatenate them along axis 3 (channel dimension)
     spatial_batch = tf.convert_to_tensor(generate_spatial_batch(N, featmap_H, featmap_W))
-    feat_all = tf.concat(values=[tf.nn.l2_normalize(feat_lang, 1),
-                                 tf.nn.l2_normalize(feat_vis_reshape, 1),
+    feat_all = tf.concat(values=[tf.nn.l2_normalize(feat_lang, 3),
+                                 tf.nn.l2_normalize(feat_vis, 3),
                                  spatial_batch], axis=3)
 
     # conv all feats as RPN input
