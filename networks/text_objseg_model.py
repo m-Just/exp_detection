@@ -48,7 +48,7 @@ def text_objseg_region(text_seq_batch, imcrop_batch, spatial_batch,
 
     # feed feature maps to RPN
     rpn_net = RPN({'gt_boxes': gt_box_batch, 'im_info': imsize_batch},
-        'feat_all_conv', rpn_feat_dim, trainable=True)
+        feat_all_conv, rpn_feat_dim, trainable=True)
 
     # MLP Classifier over concatenate feature
     # with tf.variable_scope('classifier'):
