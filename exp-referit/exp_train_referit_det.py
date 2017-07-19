@@ -190,7 +190,7 @@ sess.run(tf.global_variables_initializer())
 # Load pretrained ResNet and randomly initialize the last layer
 restored_var = [var for var in tf.global_variables()
     if 'fc1_voc12' not in var.name and 'rpn' not in var.name
-    and 'betal' not in var.name and 'Variable' not in var.name
+    and 'power' not in var.name and 'Variable' not in var.name
     and 'lstm' not in var.name and 'feat_all_conv' not in var.name
     and 'embedding' not in var.name]
 snapshot_loader = tf.train.Saver(var_list=restored_var)
