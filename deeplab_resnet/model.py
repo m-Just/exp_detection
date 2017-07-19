@@ -3,8 +3,8 @@
 # The batch normalisation layer is provided by
 # the slim library (https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim).
 
+from kaffe.tensorflow import Network
 import tensorflow as tf
-from networks import Network
 
 class DeepLabResNetModel(Network):
     def setup(self, is_training, num_classes):
