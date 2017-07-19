@@ -11,7 +11,7 @@ from utils.cnn import conv_relu_layer as conv_relu
 # from utils.cnn import fc_relu_layer as fc_relu
 from models.processing_tools import *
 from networks import lstm_net
-from networks.rpn_model import RPN
+from networks.rpn_model import RegionProposalNetwork
 from deeplab_resnet.model import DeepLabResNetModel
 
 IMG_MEAN = np.array((104.00698793,116.66876762,122.67891434), dtype=np.float32)
@@ -47,7 +47,7 @@ def text_objseg_region(text_seq_batch, imcrop_batch, spatial_batch,
                               # TODO test for different output dim
 
     # feed feature maps to RPN
-    rpn_net = RPN({'gt_boxes': gt_box_batch, 'im_info': imsize_batch},
+    rpn_net = RegionProposalNetwork({'gt_boxes': gt_box_batch, 'im_info': imsize_batch},
         feat_all_conv, rpn_feat_dim, trainable=True)
 
     return rpn_net

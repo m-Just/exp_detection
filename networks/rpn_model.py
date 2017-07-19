@@ -6,7 +6,7 @@ n_classes = 21
 _feat_stride = [16,]
 anchor_scales = [8, 16, 32]
 
-class RPN(Network):
+class RegionProposalNetwork(Network):
     def __init__(self, inputs, feat_name, feat_dim, trainable=True):
         self.inputs = []
         self.layers = dict(inputs)
