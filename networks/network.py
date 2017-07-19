@@ -81,9 +81,13 @@ class Network(object):
             self.terminals.append(fed_layer)
         return self
 
-    def get_output(self):   # TODO resnet and rpn use different get_output
-        '''Returns the current network output.'''
-        return self.terminals[-1]
+    def get_output(self, layer):
+        try:
+            layer = self.layers[layer]
+        except KeyError:
+            print self.layers.keys()
+            raise KeyError('Unknown layer name fed: %s'%layer)
+        return layer
 
     def get_unique_name(self, prefix):
         '''Returns an index-suffixed unique name for the given prefix.
