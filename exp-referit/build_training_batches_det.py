@@ -26,11 +26,6 @@ vocab_file = './exp-referit/data/vocabulary_referit.txt'
 data_folder = './exp-referit/data/train_batch_det/'
 data_prefix = 'referit_train_det'
 
-# Sample selection params
-pos_iou = .7
-neg_iou = 1e-6
-neg_to_pos_ratio = 1.0
-
 # Model Param
 N = 1
 T = 20
@@ -102,7 +97,7 @@ for n_batch in range(num_batch):
     for n_sample in range(batch_begin, batch_end):
         imname, imsize, sample_bbox, description = shuffled_training_samples[n_sample]
         im = skimage.io.imread(image_dir + imname)
-        xmin, ymin, xmax, ymax = sample_bbox
+        xmin, ymin, xmax, ymax = sample_bbox[0]
 
         imcrop = im[ymin:ymax+1, xmin:xmax+1, :]
         imcrop = skimage.img_as_ubyte(skimage.transform.resize(imcrop, [input_H, input_W]))
