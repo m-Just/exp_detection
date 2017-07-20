@@ -230,6 +230,8 @@ for n_iter in range(args.max_iter):
     bbox_pred, rpn_loss_val, _, lr_val = \
     sess.run([net.layers['rpn_bbox_pred'], rpn_loss_box,
         train_step, learning_rate], feed_dict=feed_dict)
+ 
+    print(bbox_pred.shape)
 
     rpn_loss_avg = decay * rpn_loss_avg + (1 - decay) * rpn_loss_val
     print('\titer = %d, rpn_reg_loss (cur) = %f, rpn_reg_loss (avg) = %f, lr = %f'

@@ -6,3 +6,11 @@ exp-referit/exp_train_referit_det_original.py
 exp-referit/faster_rcnn_train.py
 *.ckpt
 *.tfmodel
+*edgebox*
+*.gz
+*.pyc
+*.log
+exp-referit/data/train_batch_det
+exp-referit/data/train_batch_seg
+exp-referit/referit-dataset/images
+exp-referit/referit-dataset/mask
