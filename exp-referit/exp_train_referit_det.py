@@ -235,9 +235,24 @@ for n_iter in range(args.max_iter):
     }
 
     # Forward and Backward pass
-    bbox_pred, rpn_cross_entropy_val, rpn_loss_box_val, _, lr_val = \
-    sess.run([net.layers['rpn_bbox_pred'], rpn_cross_entropy, rpn_loss_box,
-        train_step, learning_rate], feed_dict=feed_dict)
+    reshape_cls_score, cur_rpn_label, bbox_pred, rpn_cross_entropy_val, rpn_loss_box_val, _, lr_val = \
+    sess.run([net.layers['rpn_cls_score_reshape'], net.layers['rpn-data'], net.layers['rpn_bbox_pred'], 
+             rpn_cross_entropy, rpn_loss_box, train_step, learning_rate], 
+             feed_dict=feed_dict)
+
+    #print(reshape_cls_score.shape)
+    #print(reshape_cls_score[0, 0, 0, :])
+    #print(cls_score.shape)
+    #for i in xrange(0, 18, 2):
+    #    print(cls_score[0, 0, 0, i:i+2])
+
+    cur_rpn_cls_score = tf.reshape(reshape_cls_score, [-1, 2])
+    cur_rpn_label = tf.reshape(cur_rpn_label[0], [-1])
+    cur_rpn_cls_score = tf.reshape(tf.gather(cur_rpn_cls_score, tf.where(tf.not_equal(cur_rpn_label, -1))),[-1, 2])
+    cur_rpn_label = tf.reshape(tf.gather(cur_rpn_label, tf.where(tf.not_equal(cur_rpn_label, -1))),[-1])
+    cur_rpn_diff = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=cur_rpn_cls_score, labels=cur_rpn_label)
+
+    print(cur_rpn_diff.eval(session=sess))
 
     rpn_loss_val = rpn_cross_entropy_val + rpn_loss_box_val
     rpn_loss_avg = decay * rpn_loss_avg + (1 - decay) * rpn_loss_val
