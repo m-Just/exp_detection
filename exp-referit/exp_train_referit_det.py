@@ -142,20 +142,28 @@ print('Done.')
 # Loss function and accuracy
 ################################################################################
 
+# RPN
+# classification loss
+rpn_cls_score = tf.reshape(net.get_output('rpn_cls_score_reshape'), [-1, 2])
+rpn_label = tf.reshape(net.get_output('rpn-data')[0], [-1])
+rpn_cls_score = tf.reshape(tf.gather(rpn_cls_score, tf.where(tf.not_equal(rpn_label, -1))),[-1, 2])
+rpn_label = tf.reshape(tf.gather(rpn_label, tf.where(tf.not_equal(rpn_label, -1))),[-1])
+rpn_cross_entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=rpn_cls_score, labels=rpn_label))
+
 # bounding box regression L1 loss
 rpn_bbox_pred = net.get_output('rpn_bbox_pred')
-rpn_bbox_targets = tf.transpose(net.get_output('rpn-data')[1],[0,2,3,1])
-rpn_bbox_inside_weights = tf.transpose(net.get_output('rpn-data')[2],[0,2,3,1])
-rpn_bbox_outside_weights = tf.transpose(net.get_output('rpn-data')[3],[0,2,3,1])
+rpn_bbox_targets = tf.transpose(net.get_output('rpn-data')[1], [0, 2, 3, 1])
+rpn_bbox_inside_weights = tf.transpose(net.get_output('rpn-data')[2], [0, 2, 3, 1])
+rpn_bbox_outside_weights = tf.transpose(net.get_output('rpn-data')[3], [0, 2, 3, 1])
 
 rpn_smooth_l1 = rcnn.modified_smooth_l1(3.0, rpn_bbox_pred, rpn_bbox_targets,
     rpn_bbox_inside_weights, rpn_bbox_outside_weights)
 rpn_loss_box = tf.reduce_mean(tf.reduce_sum(rpn_smooth_l1, reduction_indices=[1, 2, 3]))
 
-# regularization L2 loss
-reg_loss = loss.l2_regularization_loss(reg_var_list, weight_decay)
+# TODO regularization L2 loss
+# reg_loss = loss.l2_regularization_loss(reg_var_list, weight_decay)
 
-total_loss = rpn_loss_box + reg_loss
+total_loss = rpn_cross_entropy + rpn_loss_box
 
 ################################################################################
 # Solver
@@ -227,14 +235,13 @@ for n_iter in range(args.max_iter):
     }
 
     # Forward and Backward pass
-    bbox_pred, rpn_loss_val, _, lr_val = \
-    sess.run([net.layers['rpn_bbox_pred'], rpn_loss_box,
+    bbox_pred, rpn_cross_entropy_val, rpn_loss_box_val, _, lr_val = \
+    sess.run([net.layers['rpn_bbox_pred'], rpn_cross_entropy, rpn_loss_box,
         train_step, learning_rate], feed_dict=feed_dict)
- 
-    print(bbox_pred.shape)
 
+    rpn_loss_val = rpn_cross_entropy_val + rpn_loss_box_val
     rpn_loss_avg = decay * rpn_loss_avg + (1 - decay) * rpn_loss_val
-    print('\titer = %d, rpn_reg_loss (cur) = %f, rpn_reg_loss (avg) = %f, lr = %f'
+    print('\titer = %d, rpn_loss (cur) = %f, rpn_loss (avg) = %f, lr = %f'
         % (n_iter, rpn_loss_val, rpn_loss_avg, lr_val))
 
     # TODO Accuracy

@@ -26,6 +26,7 @@ class RegionProposalNetwork(Network):
              .conv(3, 3, self.feat_dim, 1, 1, name='rpn_conv/3x3')
              .conv(1, 1, len(anchor_scales)*3*2, 1, 1, padding='VALID',
                 relu=False, name='rpn_cls_score'))
+             .reshape_layer(2, name='rpn_cls_score_reshape')
 
         (self.feed('rpn_cls_score', 'gt_boxes', 'im_info')
              .anchor_target_layer(_feat_stride, anchor_scales, name='rpn-data'))
