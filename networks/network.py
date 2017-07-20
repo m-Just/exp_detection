@@ -291,3 +291,13 @@ class Network(object):
     @layer
     def dropout_rcnn(self, input, keep_prob, name):
         return tf.nn.dropout(input, keep_prob, name=name)
+
+    @layer
+    def reshape_layer(self, input, d,name):
+        input_shape = tf.shape(input)
+        if name == 'rpn_cls_prob_reshape':
+            return tf.transpose(tf.reshape(tf.transpose(input,[0,3,1,2]),[input_shape[0],
+                   int(d),tf.cast(tf.cast(input_shape[1],tf.float32)/tf.cast(d,tf.float32)*tf.cast(input_shape[3],tf.float32),tf.int32),input_shape[2]]),[0,2,3,1],name=name)
+        else:
+            return tf.transpose(tf.reshape(tf.transpose(input,[0,3,1,2]),[input_shape[0],
+                   int(d),tf.cast(tf.cast(input_shape[1],tf.float32)*(tf.cast(input_shape[3],tf.float32)/tf.cast(d,tf.float32)),tf.int32),input_shape[2]]),[0,2,3,1],name=name)
