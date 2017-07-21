@@ -78,7 +78,7 @@ np.random.seed(3)
 perm_idx = np.random.permutation(len(training_samples))
 shuffled_training_samples = [training_samples[n] for n in perm_idx]
 del training_samples
-print('#total sample =', len(training_samples))
+print('#total sample =', len(shuffled_training_samples))
 
 num_batch = len(shuffled_training_samples) // N
 print('#total batch = %d' % num_batch)
