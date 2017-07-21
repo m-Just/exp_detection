@@ -58,65 +58,30 @@ for imname in imlist:
 # Load training data
 ################################################################################
 
-# Generate a list of training samples
-# Each training sample is a tuple of 5 elements of
-# (imname, imsize, sample_bbox, description, label)
-# 1 as positive label and 0 as negative label (i.e. the probability of being pos)
-
 # Gather training sample per image
-# Positive training sample includes the ground-truth
-training_samples_pos = []
-training_samples_neg = []
+trainin_samples = []
 for imname in imlist:
     this_imcrop_names = imcrop_dict[imname]
     imsize = imsize_dict[imname]
-    bbox_proposals = bbox_proposal_dict[imname]
-    # for each ground-truth annotation, use gt box and proposal boxes as positive examples
-    # and proposal box with small iou as negative examples
     for imcrop_name in this_imcrop_names:
         if not imcrop_name in query_dict:
             continue
         gt_bbox = np.array(bbox_dict[imcrop_name]).reshape((1, 4))
-        IoUs = eval_tools.compute_bbox_iou(bbox_proposals, gt_bbox)
-        pos_boxes = bbox_proposals[IoUs >= pos_iou, :]
-        pos_boxes = np.concatenate((gt_bbox, pos_boxes), axis=0)
-        neg_boxes = bbox_proposals[IoUs <  neg_iou, :]
-
         this_descriptions = query_dict[imcrop_name]
-        # generate them per discription
+
         for description in this_descriptions:
-            # Positive training samples
-            for n_pos in range(pos_boxes.shape[0]):
-                sample = (imname, imsize, pos_boxes[n_pos], description, 1)
-                training_samples_pos.append(sample)
-            # Negative training samples
-            for n_neg in range(neg_boxes.shape[0]):
-                sample = (imname, imsize, neg_boxes[n_neg], description, 0)
-                training_samples_neg.append(sample)
+            sample = (imname, imsize, gt_bbox, description)
+            training_samples.append(sample)
 
-# Print numbers of positive and negative samples
-print('#pos=', len(training_samples_pos))
-print('#neg=', len(training_samples_neg))
-
-# Subsample negative training data
-np.random.seed(3)
-sample_idx = np.random.choice(len(training_samples_neg),
-                              min(len(training_samples_neg),
-                                  int(neg_to_pos_ratio*len(training_samples_pos))),
-                              replace=False)
-training_samples_neg_subsample = [training_samples_neg[n] for n in sample_idx]
-print('#neg_subsample=', len(training_samples_neg_subsample))
-
-# Merge and shuffle training examples
-training_samples = training_samples_pos + training_samples_neg_subsample
+# Shuffle samples
 np.random.seed(3)
 perm_idx = np.random.permutation(len(training_samples))
 shuffled_training_samples = [training_samples[n] for n in perm_idx]
 del training_samples
-print('#total sample=', len(shuffled_training_samples))
+print('#total sample =', len(training_samples))
 
 num_batch = len(shuffled_training_samples) // N
-print('total batch number: %d' % num_batch)
+print('#total batch = %d' % num_batch)
 
 ################################################################################
 # Save training samples to disk
@@ -125,7 +90,6 @@ print('total batch number: %d' % num_batch)
 text_seq_batch = np.zeros((T, N), dtype=np.int32)
 imcrop_batch = np.zeros((N, input_H, input_W, 3), dtype=np.uint8)
 spatial_batch = np.zeros((N, 8), dtype=np.float32)
-label_batch = np.zeros((N, 1), dtype=np.bool)
 imsize_batch = np.zeros((N, 2), dtype=np.float32)
 gt_box_batch = np.zeros((N, 5), dtype=np.float32)   # (x1, y1, x2, y2, cls)
 
@@ -136,7 +100,7 @@ for n_batch in range(num_batch):
     batch_begin = n_batch * N
     batch_end = (n_batch+1) * N
     for n_sample in range(batch_begin, batch_end):
-        imname, imsize, sample_bbox, description, label = shuffled_training_samples[n_sample]
+        imname, imsize, sample_bbox, description = shuffled_training_samples[n_sample]
         im = skimage.io.imread(image_dir + imname)
         xmin, ymin, xmax, ymax = sample_bbox
 
@@ -150,14 +114,12 @@ for n_batch in range(num_batch):
         imcrop_batch[idx, ...] = imcrop
         spatial_batch[idx, ...] = spatial_feat
         imsize_batch[idx, ...] = np.array(imsize[::-1], dtype=np.float32) # result size format is height x width
-        label_batch[idx] = label
-        gt_box_batch[idx, ...] = np.array([xmin, ymin, xmax, ymax, label], dtype=np.float32)
-            # TODO here labels = 0 or 1 (object or non-object)
+        gt_box_batch[idx, ...] = np.array([xmin, ymin, xmax, ymax, 1], dtype=np.float32)
+            # TODO here labels = 1 or 0 (object or non-object)
 
     np.savez(file=data_folder + data_prefix + '_' + str(n_batch) + '.npz',
         text_seq_batch=text_seq_batch,
         imcrop_batch=imcrop_batch,
         spatial_batch=spatial_batch,
         imsize_batch=imsize_batch,
-        label_batch=label_batch,
         gt_box_batch=gt_box_batch)
