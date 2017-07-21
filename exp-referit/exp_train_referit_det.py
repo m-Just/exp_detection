@@ -88,7 +88,6 @@ os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 text_seq_batch = tf.placeholder(tf.int32, [T, N])
 imcrop_batch = tf.placeholder(tf.float32, [N, input_H, input_W, 3])
 spatial_batch = tf.placeholder(tf.float32, [N, 8])
-label_batch = tf.placeholder(tf.float32, [N, 1])
 imsize_batch = tf.placeholder(tf.float32, [N, 2])
 gt_box_batch = tf.placeholder(tf.float32, [N, 5])
 
@@ -160,8 +159,8 @@ rpn_smooth_l1 = rcnn.modified_smooth_l1(3.0, rpn_bbox_pred, rpn_bbox_targets,
     rpn_bbox_inside_weights, rpn_bbox_outside_weights)
 rpn_loss_box = tf.reduce_mean(tf.reduce_sum(rpn_smooth_l1, reduction_indices=[1, 2, 3]))
 
-# TODO regularization L2 loss
-# reg_loss = loss.l2_regularization_loss(reg_var_list, weight_decay)
+# regularization L2 loss
+reg_loss = loss.l2_regularization_loss(reg_var_list, weight_decay)
 
 total_loss = rpn_cross_entropy + rpn_loss_box
 
@@ -221,7 +220,6 @@ for n_iter in range(args.max_iter):
     imcrop_val = batch['imcrop_batch'].astype(np.float32)
     imcrop_val = imcrop_val[:,:,:,::-1] - segmodel.IMG_MEAN
     spatial_batch_val = batch['spatial_batch']
-    label_val = batch['label_batch'].astype(np.float32)
     imsize_val = batch['imsize_batch'].astype(np.float32)
     gt_box_val = batch['gt_box_batch'].astype(np.float32)
 
@@ -229,21 +227,22 @@ for n_iter in range(args.max_iter):
         text_seq_batch: text_seq_val,
         imcrop_batch  : imcrop_val,
         spatial_batch : spatial_batch_val,
-        label_batch   : label_val,
         imsize_batch  : imsize_val,
         gt_box_batch  : gt_box_val,
     }
 
     # Forward and Backward pass
-    bbox_pred, rpn_cross_entropy_val, rpn_loss_box_val, _, lr_val = \
-    sess.run([net.layers['rpn_bbox_pred'], rpn_cross_entropy, rpn_loss_box,
-        train_step, learning_rate], feed_dict=feed_dict)
+    score, bbox_pred, rpn_cross_entropy_val, rpn_loss_box_val, _, lr_val = \
+    sess.run([rpn_cls_score, net.layers['rpn_bbox_pred'],
+        rpn_cross_entropy, rpn_loss_box, train_step, learning_rate],
+        feed_dict=feed_dict)
 
     rpn_loss_val = rpn_cross_entropy_val + rpn_loss_box_val
     rpn_loss_avg = decay * rpn_loss_avg + (1 - decay) * rpn_loss_val
     print('\titer = %d, rpn_loss (cur) = %f, rpn_loss (avg) = %f, lr = %f'
         % (n_iter, rpn_loss_val, rpn_loss_avg, lr_val))
 
+    print(score.eval(session=sess))
     # TODO Accuracy
 
     # Save snapshot
