@@ -59,7 +59,7 @@ for imname in imlist:
 ################################################################################
 
 # Gather training sample per image
-trainin_samples = []
+training_samples = []
 for imname in imlist:
     this_imcrop_names = imcrop_dict[imname]
     imsize = imsize_dict[imname]
