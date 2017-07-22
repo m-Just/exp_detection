@@ -32,6 +32,8 @@ num_vocab = 8803
 embed_dim = 1000
 lstm_dim = 1000
 mlp_hidden_dims = 500
+input_H = 320
+input_W = 320
 
 # Evaluation Param
 correct_iou_thresh = 0.5
