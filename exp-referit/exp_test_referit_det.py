@@ -97,6 +97,8 @@ eval_bbox_num_list = [1, 10, 100]
 bbox_correct = np.zeros(len(eval_bbox_num_list), dtype=np.int32)
 bbox_total = 0
 
+text_seq_val = np.zeros((T, 1), dtype=np.int32)
+
 num_im = len(imlist)
 for n_im in range(num_im):
     print('testing image %d / %d' % (n_im, num_im))
@@ -112,7 +114,7 @@ for n_im in range(num_im):
 
     # Extract textual features from sentences
     for imcrop_name, gt_bbox, description in flat_query_dict[imname]:
-        text_seq_val = text_processing.preprocess_sentence(description, vocab_dict, T)
+        text_seq_val[:, 0] = text_processing.preprocess_sentence(description, vocab_dict, T)
 
         feed_dict = {
             text_seq_batch: text_seq_val,
