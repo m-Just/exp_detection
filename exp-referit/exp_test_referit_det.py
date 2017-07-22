@@ -33,9 +33,6 @@ embed_dim = 1000
 lstm_dim = 1000
 mlp_hidden_dims = 500
 
-D_im = 1000
-D_text = lstm_dim
-
 # Evaluation Param
 correct_iou_thresh = 0.5
 use_nms = False
@@ -52,7 +49,7 @@ imsize_batch = np.zeros((N, 2), dtype=np.float32)
 gt_box_batch = np.zeros((N, 5), dtype=np.float32)   # (x1, y1, x2, y2, cls)
 
 # Outputs
-scores = segmodel.text_objseg_region(text_seq_batch, imcrop_batch, imsize_batch,
+net = segmodel.text_objseg_region(text_seq_batch, imcrop_batch, imsize_batch,
     gt_box_batch, num_vocab, embed_dim, lstm_dim, rpn_feat_dim,
     mlp_dropout=mlp_dropout, is_training=is_bn_training)
 
@@ -91,36 +88,43 @@ for imname in imlist:
 # Testing
 ################################################################################
 
+rpn_bbox_pred = tf.reshape(net.get_output('rpn_bbox_pred'), [-1, 4])    # TODO gather according to rpn_label ?
+rpn_cls_score = tf.reshape(net.get_output('rpn_cls_score_reshape'), [-1, 2])
+pos_label = np.ones(len(label), dtype=np.int32)
+
 eval_bbox_num_list = [1, 10, 100]
 bbox_correct = np.zeros(len(eval_bbox_num_list), dtype=np.int32)
 bbox_total = 0
-
-# Pre-allocate arrays
-imcrop_val = np.zeros((N, 224, 224, 3), dtype=np.float32)
-spatial_val = np.zeros((N, 8), dtype=np.float32)
-text_seq_val = np.zeros((T, 1), dtype=np.int32)
-lstm_top_val = np.zeros((N, D_text))
 
 num_im = len(imlist)
 for n_im in range(num_im):
     print('testing image %d / %d' % (n_im, num_im))
     imname = imlist[n_im]
-    imsize = imsize_dict[imname]
+    imsize_val = imsize_dict[imname]
 
-    # # Extract visual features from all proposals
-    # im = skimage.io.imread(image_dir + imname)
-    # if im.ndim == 2:
-    #     im = np.tile(im[:, :, np.newaxis], (1, 1, 3))
-    # imcrop_val[:num_proposal, ...] = im_processing.crop_bboxes_subtract_mean(
-    #     im, bbox_proposals, 224, vgg_net.channel_mean)
+    # Extract visual features from image
+    processed_im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))
+    if processed_im.ndim == 2:
+        processed_im = processed_im[:, :, np.newaxis]
+    imcrop_val = processed_im[..., ::-1] - segmodel.IMG_MEAN
 
     # Extract textual features from sentences
     for imcrop_name, gt_bbox, description in flat_query_dict[imname]:
-        text_seq_val[:, 0] = text_processing.preprocess_sentence(description, vocab_dict, T)
+        text_seq_val = text_processing.preprocess_sentence(description, vocab_dict, T)
 
         feed_dict = {
             text_seq_batch: text_seq_val,
             imcrop_batch  : imcrop_val,
             imsize_batch  : imsize_val,
-            gt_box_batch  : gt_box_val,
-        }
+            gt_box_batch  : np.array([0, 0, 0, 0, 1], dtype=np.float32)
+        }   # TODO gt_box_batch is here only for rpn anchor layer's required parameter,
+            # which is unused in the inferences, and should be removed later
+
+        bbox_pred, score = sess.run([rpn_bbox_pred, rpn_cls_score], feed_dict=feed_dict)
+
+        pos_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
+            labels=pos_label, logits=score).eval(session=sess)
+        predictions = np.argsort(pos_loss)
+
+        for i in predictions:
+            print(bbox_pred[i])

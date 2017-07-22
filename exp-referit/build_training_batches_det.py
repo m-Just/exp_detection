@@ -108,7 +108,6 @@ for n_batch in range(num_batch):
         imcrop_batch[idx, ...] = processed_im
         imsize_batch[idx, ...] = np.array(imsize[::-1], dtype=np.float32) # result size format is height x width
         gt_box_batch[idx, ...] = np.array([xmin, ymin, xmax, ymax, 1], dtype=np.float32)
-            # TODO here labels = 1 or 0 (object or non-object)
 
     np.savez(file=data_folder + data_prefix + '_' + str(n_batch) + '.npz',
         text_seq_batch=text_seq_batch,

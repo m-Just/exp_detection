@@ -240,21 +240,19 @@ for n_iter in range(args.max_iter):
         rpn_cross_entropy, rpn_loss_box, train_step, learning_rate],
         feed_dict=feed_dict)
 
+    # Write log as tf_record for tensorboard visualization
     #if n_iter % 10 == 0:
     #    train_writer.add_summary(summary, n_iter)
 
+    # Loss
     rpn_loss_val = rpn_cross_entropy_val + rpn_loss_box_val
     rpn_loss_avg = decay * rpn_loss_avg + (1 - decay) * rpn_loss_val
-    print('\titer = %d, rpn_loss (cur) = %f, rpn_loss (avg) = %f, lr = %f'
-        % (n_iter, rpn_loss_val, rpn_loss_avg, lr_val))
 
+    # Accuracy
     pos_label = np.ones(len(label), dtype=np.int32)
-    # print(pos_label)
-    # print(score)
     pos_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=pos_label, logits=score).eval(session=sess)
     predictions = np.argsort(pos_loss)
 
-    # Accuracy
     assert len(label) == len(predictions)
     pos_sample = np.where(label == 1)[0]
     neg_sample = np.where(label == 0)[0]
@@ -269,10 +267,13 @@ for n_iter in range(args.max_iter):
     avg_accuracy_all = decay*avg_accuracy_all + (1-decay)*accuracy
     avg_accuracy_pos = decay*avg_accuracy_pos + (1-decay)*pos_accuracy
     avg_accuracy_neg = decay*avg_accuracy_neg + (1-decay)*neg_accuracy
+
+    print('\titer = %d, rpn_loss (cur) = %f, rpn_loss (avg) = %f, lr = %f'
+        % (n_iter, rpn_loss_val, rpn_loss_avg, lr_val))
     print('\titer = %d, accuracy (cur) = %f (all), %f (pos), %f (neg)'
-          % (n_iter, accuracy, pos_accuracy, neg_accuracy))
+        % (n_iter, accuracy, pos_accuracy, neg_accuracy))
     print('\titer = %d, accuracy (avg) = %f (all), %f (pos), %f (neg)'
-          % (n_iter, avg_accuracy_all, avg_accuracy_pos, avg_accuracy_neg))
+        % (n_iter, avg_accuracy_all, avg_accuracy_pos, avg_accuracy_neg))
 
     # print(pos_sample)
     # print(top_pred)
