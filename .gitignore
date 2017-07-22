@@ -9,6 +9,7 @@ networks/faster_rcnn_network.py
 exp-referit/init_referit_seg_lowres_deeplab101.py
 exp-referit/exp_train_referit_seg_lowres_deeplab101.py
 exp-referit/exp_train_referit_det_original.py
+exp-referit/exp_test_referit_det_original.py
 exp-referit/faster_rcnn_train.py
 exp-referit/data/train_batch_det
 exp-referit/data/train_batch_seg

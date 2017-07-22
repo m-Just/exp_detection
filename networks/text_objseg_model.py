@@ -16,8 +16,8 @@ from deeplab_resnet.model import DeepLabResNetModel
 
 IMG_MEAN = np.array((104.00698793,116.66876762,122.67891434), dtype=np.float32)
 
-def text_objseg_region(text_seq_batch, imcrop_batch, spatial_batch,
-    imsize_batch, gt_box_batch, num_vocab, embed_dim, lstm_dim, rpn_feat_dim,
+def text_objseg_region(text_seq_batch, imcrop_batch, imsize_batch,
+    gt_box_batch, num_vocab, embed_dim, lstm_dim, rpn_feat_dim,
     mlp_dropout, is_training):
 
     # Language feature (LSTM hidden state)

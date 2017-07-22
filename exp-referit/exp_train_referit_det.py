@@ -87,14 +87,13 @@ os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 # Inputs
 text_seq_batch = tf.placeholder(tf.int32, [T, N])
 imcrop_batch = tf.placeholder(tf.float32, [N, input_H, input_W, 3])
-spatial_batch = tf.placeholder(tf.float32, [N, 8])
 imsize_batch = tf.placeholder(tf.float32, [N, 2])
 gt_box_batch = tf.placeholder(tf.float32, [N, 5])
 
 # Outputs
-net = segmodel.text_objseg_region(text_seq_batch, imcrop_batch,
-    spatial_batch, imsize_batch, gt_box_batch, num_vocab, embed_dim,
-    lstm_dim, rpn_feat_dim, mlp_dropout=mlp_dropout, is_training=is_bn_training)
+net = segmodel.text_objseg_region(text_seq_batch, imcrop_batch, imsize_batch,
+    gt_box_batch, num_vocab, embed_dim, lstm_dim, rpn_feat_dim,
+    mlp_dropout=mlp_dropout, is_training=is_bn_training)
 
 ################################################################################
 # Collect trainable variables, regularized variables and learning rates
@@ -225,14 +224,12 @@ for n_iter in range(args.max_iter):
     text_seq_val = batch['text_seq_batch']
     imcrop_val = batch['imcrop_batch'].astype(np.float32)
     imcrop_val = imcrop_val[:,:,:,::-1] - segmodel.IMG_MEAN
-    spatial_batch_val = batch['spatial_batch']
     imsize_val = batch['imsize_batch'].astype(np.float32)
     gt_box_val = batch['gt_box_batch'].astype(np.float32)
 
     feed_dict = {
         text_seq_batch: text_seq_val,
         imcrop_batch  : imcrop_val,
-        spatial_batch : spatial_batch_val,
         imsize_batch  : imsize_val,
         gt_box_batch  : gt_box_val,
     }
@@ -265,10 +262,10 @@ for n_iter in range(args.max_iter):
     btm_pred = predictions[len(pos_sample):]
     true_pos = np.intersect1d(pos_sample, top_pred, assume_unique=True)
     true_neg = np.intersect1d(neg_sample, btm_pred, assume_unique=True)
+
     accuracy = float(len(true_pos) + len(true_neg)) / len(label)
     pos_accuracy = float(len(true_pos)) / len(pos_sample)
     neg_accuracy = float(len(true_neg)) / len(neg_sample)
-
     avg_accuracy_all = decay*avg_accuracy_all + (1-decay)*accuracy
     avg_accuracy_pos = decay*avg_accuracy_pos + (1-decay)*pos_accuracy
     avg_accuracy_neg = decay*avg_accuracy_neg + (1-decay)*neg_accuracy

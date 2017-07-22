@@ -84,7 +84,6 @@ print('#total batch = %d' % num_batch)
 
 text_seq_batch = np.zeros((T, N), dtype=np.int32)
 imcrop_batch = np.zeros((N, input_H, input_W, 3), dtype=np.uint8)
-spatial_batch = np.zeros((N, 8), dtype=np.float32)
 imsize_batch = np.zeros((N, 2), dtype=np.float32)
 gt_box_batch = np.zeros((N, 5), dtype=np.float32)   # (x1, y1, x2, y2, cls)
 
@@ -107,7 +106,6 @@ for n_batch in range(num_batch):
         idx = n_sample - batch_begin
         text_seq_batch[:, idx] = text_seq
         imcrop_batch[idx, ...] = imcrop
-        spatial_batch[idx, ...] = spatial_feat
         imsize_batch[idx, ...] = np.array(imsize[::-1], dtype=np.float32) # result size format is height x width
         gt_box_batch[idx, ...] = np.array([xmin, ymin, xmax, ymax, 1], dtype=np.float32)
             # TODO here labels = 1 or 0 (object or non-object)
@@ -115,6 +113,5 @@ for n_batch in range(num_batch):
     np.savez(file=data_folder + data_prefix + '_' + str(n_batch) + '.npz',
         text_seq_batch=text_seq_batch,
         imcrop_batch=imcrop_batch,
-        spatial_batch=spatial_batch,
         imsize_batch=imsize_batch,
         gt_box_batch=gt_box_batch)
