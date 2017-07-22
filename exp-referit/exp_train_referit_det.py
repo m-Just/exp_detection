@@ -254,23 +254,25 @@ for n_iter in range(args.max_iter):
     pos_label = np.ones(len(label), dtype=np.int32)
     # print(pos_label)
     # print(score)
-    pos_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=pos_label, logits=score)
-    print(pos_loss.eval(session=sess))
+    pos_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=pos_label, logits=score).eval(session=sess)
+    top_pred = np.argsort(pos_loss)
+    print(top_pred)
 
     # TODO Accuracy
-    assert len(label) == len(rpn_cls_pred)
-    pos_sample = np.where(label == 1)[0]
-    neg_sample = np.where(label == 0)[0]
-    predictions = np.argsort(rpn_cls_pred)
-    top_pred = predictions[:len(pos_sample)]
-    btm_pred = predictions[len(pos_sample):]
-    true_pos = np.intersect1d(pos_sample, top_pred, assume_unique=True)
-    true_neg = np.intersect1d(neg_sample, btm_pred, assume_unique=True)
-    accuracy = float(len(true_pos) + len(true_neg)) / len(label)
-    pos_accuracy = float(len(true_pos)) / len(pos_sample)
-    neg_accuracy = float(len(true_neg)) / len(neg_sample)
-    print('\taccuracy (all) = %f, accuracy (pos) = %f, accuracy (neg) = %f'
-          % (accuracy, pos_accuracy, neg_accuracy))
+    assert len(label) == len(top_pred)
+
+    # pos_sample = np.where(label == 1)[0]
+    # neg_sample = np.where(label == 0)[0]
+    # predictions = np.argsort(rpn_cls_pred)
+    # top_pred = predictions[:len(pos_sample)]
+    # btm_pred = predictions[len(pos_sample):]
+    # true_pos = np.intersect1d(pos_sample, top_pred, assume_unique=True)
+    # true_neg = np.intersect1d(neg_sample, btm_pred, assume_unique=True)
+    # accuracy = float(len(true_pos) + len(true_neg)) / len(label)
+    # pos_accuracy = float(len(true_pos)) / len(pos_sample)
+    # neg_accuracy = float(len(true_neg)) / len(neg_sample)
+    # print('\taccuracy (all) = %f, accuracy (pos) = %f, accuracy (neg) = %f'
+    #       % (accuracy, pos_accuracy, neg_accuracy))
 
     # Save snapshot
     if (n_iter+1) % snapshot == 0 or (n_iter+1) == args.max_iter:
