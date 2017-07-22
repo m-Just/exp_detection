@@ -92,7 +92,9 @@ for imname in imlist:
 
 rpn_bbox_pred = tf.reshape(net.get_output('rpn_bbox_pred'), [-1, 4])    # TODO gather according to rpn_label ?
 rpn_cls_score = tf.reshape(net.get_output('rpn_cls_score_reshape'), [-1, 2])
-pos_label = np.ones(len(label), dtype=np.int32)
+print(rpn_bbox_pred.get_shape().as_list())
+print(rpn_cls_score.get_shape().as_list())
+pos_label = np.ones(rpn_bbox_pred.get_shape().as_list()[-2], dtype=np.int32)
 
 eval_bbox_num_list = [1, 10, 100]
 bbox_correct = np.zeros(len(eval_bbox_num_list), dtype=np.int32)
