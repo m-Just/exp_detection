@@ -27,7 +27,7 @@ pretrained_model = './exp-referit/tfmodel/referit_rpn_det_iter_60000.tfmodel'
 
 # Model Params
 T = 20
-N = 100
+N = 1   # TODO changed from 100 to 1
 num_vocab = 8803
 embed_dim = 1000
 lstm_dim = 1000
