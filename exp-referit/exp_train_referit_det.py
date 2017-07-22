@@ -39,7 +39,7 @@ lr_decay_step = 10000
 lr_decay_rate = 0.1
 weight_decay = 0.0005
 momentum = 0.9
-max_iter = 25000
+max_iter = 60000
 
 deeplab_lr_mult = 0.1
 
@@ -53,7 +53,7 @@ data_folder = './exp-referit/data/train_batch_det/'
 data_prefix = 'referit_train_det'
 
 # Snapshot Params
-snapshot = 5000
+snapshot = 10000
 snapshot_file = './exp-referit/tfmodel/referit_rpn_det_iter_%d.tfmodel'
 
 ################################################################################
@@ -147,7 +147,8 @@ rpn_cls_score = tf.reshape(net.get_output('rpn_cls_score_reshape'), [-1, 2])
 rpn_label = tf.reshape(net.get_output('rpn-data')[0], [-1])
 rpn_cls_score = tf.reshape(tf.gather(rpn_cls_score, tf.where(tf.not_equal(rpn_label, -1))),[-1, 2])
 rpn_label = tf.reshape(tf.gather(rpn_label, tf.where(tf.not_equal(rpn_label, -1))),[-1])
-rpn_cross_entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=rpn_cls_score, labels=rpn_label))
+rpn_cls_elem_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=rpn_cls_score, labels=rpn_label)
+rpn_cross_entropy = tf.reduce_mean(rpn_cls_elem_loss)
 
 # bounding box regression L1 loss
 rpn_bbox_pred = net.get_output('rpn_bbox_pred')
@@ -213,6 +214,11 @@ rpn_loss_avg = 0
 avg_accuracy_all, avg_accuracy_pos, avg_accuracy_neg = 0, 0, 0
 decay = 0.99
 
+with tf.name_scope('summaries'):
+    tf.summary.scalar('loss', total_loss)
+merged = tf.summary.merge_all()
+train_writer = tf.summary.FileWriter('tf_logs/train')
+
 for n_iter in range(args.max_iter):
     # Read one batch
     batch = reader.read_batch()
@@ -232,18 +238,32 @@ for n_iter in range(args.max_iter):
     }
 
     # Forward and Backward pass
-    score, bbox_pred, rpn_cross_entropy_val, rpn_loss_box_val, _, lr_val = \
-    sess.run([rpn_cls_score, net.layers['rpn_bbox_pred'],
+    summary, rpn_cls_pred, label, rpn_cross_entropy_val, rpn_loss_box_val, _, lr_val = \
+    sess.run([merged, rpn_cls_elem_loss, rpn_label, 
         rpn_cross_entropy, rpn_loss_box, train_step, learning_rate],
         feed_dict=feed_dict)
+
+    #if n_iter % 10 == 0:
+    #    train_writer.add_summary(summary, n_iter)
 
     rpn_loss_val = rpn_cross_entropy_val + rpn_loss_box_val
     rpn_loss_avg = decay * rpn_loss_avg + (1 - decay) * rpn_loss_val
     print('\titer = %d, rpn_loss (cur) = %f, rpn_loss (avg) = %f, lr = %f'
         % (n_iter, rpn_loss_val, rpn_loss_avg, lr_val))
 
-    print(score.eval(session=sess))
     # TODO Accuracy
+    pos_sample = np.where(label == 1)[0]
+    neg_sample = np.where(label == 0)[0]
+    predictions = np.argsort(rpn_cls_pred)
+    top_pred = predictions[:len(pos_sample)]
+    btm_pred = predictions[len(pos_sample):]
+    true_pos = np.intersect1d(pos_sample, top_pred, assume_unique=True)
+    true_neg = np.intersect1d(neg_sample, btm_pred, assume_unique=True)
+    accuracy = float(len(true_pos) + len(true_neg)) / len(label)
+    pos_accuracy = float(len(true_pos)) / len(pos_sample)
+    neg_accuracy = float(len(true_neg)) / len(neg_sample)
+    print('\taccuracy (overall) = %f, accuracy (pos) = %f, accuracy (neg) = %f'
+          % (accuracy, pos_accuracy, neg_accuracy))
 
     # Save snapshot
     if (n_iter+1) % snapshot == 0 or (n_iter+1) == args.max_iter:
