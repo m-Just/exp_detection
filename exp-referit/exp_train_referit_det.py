@@ -271,7 +271,9 @@ for n_iter in range(args.max_iter):
 
     print(pos_sample)
     print(top_pred)
+    print(true_pos)
     print('#pos = %d' % len(pos_sample))
+    print('#TP = %d' % len(true_pos))
     print('\taccuracy (all) = %f, accuracy (pos) = %f, accuracy (neg) = %f'
           % (accuracy, pos_accuracy, neg_accuracy))
 
