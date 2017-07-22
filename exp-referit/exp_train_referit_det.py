@@ -251,7 +251,7 @@ for n_iter in range(args.max_iter):
     print('\titer = %d, rpn_loss (cur) = %f, rpn_loss (avg) = %f, lr = %f'
         % (n_iter, rpn_loss_val, rpn_loss_avg, lr_val))
 
-    pos_label = np.ones(len(label), dtype=np.float32)
+    pos_label = np.ones(len(label), dtype=np.int32)
     # print(pos_label)
     # print(score)
     pos_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=pos_label, logits=score)
