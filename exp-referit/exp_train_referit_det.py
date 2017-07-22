@@ -268,6 +268,10 @@ for n_iter in range(args.max_iter):
     accuracy = float(len(true_pos) + len(true_neg)) / len(label)
     pos_accuracy = float(len(true_pos)) / len(pos_sample)
     neg_accuracy = float(len(true_neg)) / len(neg_sample)
+
+    print(pos_sample)
+    print(top_pred)
+    print('#pos = %d' % len(pos_sample))
     print('\taccuracy (all) = %f, accuracy (pos) = %f, accuracy (neg) = %f'
           % (accuracy, pos_accuracy, neg_accuracy))
 
