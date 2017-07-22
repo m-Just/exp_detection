@@ -251,12 +251,12 @@ for n_iter in range(args.max_iter):
     print('\titer = %d, rpn_loss (cur) = %f, rpn_loss (avg) = %f, lr = %f'
         % (n_iter, rpn_loss_val, rpn_loss_avg, lr_val))
 
-
-    pos_label = np.ones((len(label), 1))
-    print(pos_label)
-    print(score)
-    pos_loss = tf.nn.softmax_cross_entropy_with_logits(labels=pos_label, logits=score)
-    print(pos_loss.eval(session=sess))
+    print(label)
+    # pos_label = np.ones((len(label), 1))
+    # print(pos_label)
+    # print(score)
+    # pos_loss = tf.nn.softmax_cross_entropy_with_logits(labels=pos_label, logits=score)
+    # print(pos_loss.eval(session=sess))
 
     # TODO Accuracy
     assert len(label) == len(rpn_cls_pred)
