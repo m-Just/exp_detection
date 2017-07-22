@@ -45,10 +45,10 @@ nms_thresh = 0.3
 ################################################################################
 
 # Inputs
-text_seq_batch = np.zeros((T, N), dtype=np.int32)
-imcrop_batch = np.zeros((N, input_H, input_W, 3), dtype=np.uint8)
-imsize_batch = np.zeros((N, 2), dtype=np.float32)
-gt_box_batch = np.zeros((N, 5), dtype=np.float32)   # (x1, y1, x2, y2, cls)
+text_seq_batch = tf.placeholder(tf.int32, [T, N])
+imcrop_batch = tf.placeholder(tf.float32, [N, input_H, input_W, 3])
+imsize_batch = tf.placeholder(tf.float32, [N, 2])
+gt_box_batch = tf.placeholder(tf.float32, [N, 5])
 
 # Outputs
 net = segmodel.text_objseg_region(text_seq_batch, imcrop_batch, imsize_batch,
