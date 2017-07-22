@@ -253,12 +253,12 @@ for n_iter in range(args.max_iter):
 
     # print(label)
     # print(score)
-    print(tf.nn.softmax_cross_entropy_with_logits(labels=tf.convert_to_tensor(label),
+    print(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=tf.convert_to_tensor(label),
         logits=tf.convert_to_tensor(score)).eval(session=sess))
     # pos_label = np.ones((len(label), 1))
     # print(pos_label)
     # print(score)
-    # pos_loss = tf.nn.softmax_cross_entropy_with_logits(labels=pos_label, logits=score)
+    # pos_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=pos_label, logits=score)
     # print(pos_loss.eval(session=sess))
 
     # TODO Accuracy
