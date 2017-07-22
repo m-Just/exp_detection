@@ -92,9 +92,6 @@ for imname in imlist:
 
 rpn_bbox_pred = tf.reshape(net.get_output('rpn_bbox_pred'), [-1, 4])    # TODO gather according to rpn_label ?
 rpn_cls_score = tf.reshape(net.get_output('rpn_cls_score_reshape'), [-1, 2])
-print(rpn_bbox_pred.get_shape().as_list())
-print(rpn_cls_score.get_shape().as_list())
-pos_label = np.ones(rpn_bbox_pred.get_shape().as_list()[-2], dtype=np.int32)
 
 eval_bbox_num_list = [1, 10, 100]
 bbox_correct = np.zeros(len(eval_bbox_num_list), dtype=np.int32)
@@ -107,6 +104,7 @@ for n_im in range(num_im):
     imsize_val = imsize_dict[imname]
 
     # Extract visual features from image
+    im = skimage.io.imread(image_dir + imname)
     processed_im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))
     if processed_im.ndim == 2:
         processed_im = processed_im[:, :, np.newaxis]
@@ -126,6 +124,7 @@ for n_im in range(num_im):
 
         bbox_pred, score = sess.run([rpn_bbox_pred, rpn_cls_score], feed_dict=feed_dict)
 
+        pos_label = np.ones(len(bbox_pred), dtype=np.int32)
         pos_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
             labels=pos_label, logits=score).eval(session=sess)
         predictions = np.argsort(pos_loss)
