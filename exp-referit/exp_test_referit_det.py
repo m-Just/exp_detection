@@ -98,7 +98,7 @@ bbox_correct = np.zeros(len(eval_bbox_num_list), dtype=np.int32)
 bbox_total = 0
 
 # Pre-allocate arrays
-imcrop_val = np.zeros((N, 224, 224, 3), dtype=np.float32)
+imcrop_val = np.zeros((N, input_H, input_W, 3), dtype=np.float32)
 text_seq_val = np.zeros((T, 1), dtype=np.int32)
 
 num_im = len(imlist)
