@@ -100,6 +100,7 @@ bbox_total = 0
 # Pre-allocate arrays
 imcrop_val = np.zeros((N, input_H, input_W, 3), dtype=np.float32)
 text_seq_val = np.zeros((T, 1), dtype=np.int32)
+gt_box_val = np.zeros((N, 5), dtype=np.float32)
 
 num_im = len(imlist)
 for n_im in range(num_im):
@@ -117,14 +118,16 @@ for n_im in range(num_im):
     # Extract textual features from sentences
     for imcrop_name, gt_bbox, description in flat_query_dict[imname]:
         text_seq_val[:, 0] = text_processing.preprocess_sentence(description, vocab_dict, T)
+        gt_box_val[0, ...] = np.array([0, 0, 0, 0, 1], dtype=np.float32)
+            # TODO gt_box_batch is here only for rpn anchor layer's required parameter,
+            # which is unused in the inferences, and should be removed later
 
         feed_dict = {
             text_seq_batch: text_seq_val,
             imcrop_batch  : imcrop_val,
             imsize_batch  : imsize_val,
-            gt_box_batch  : np.array([0, 0, 0, 0, 1], dtype=np.float32)
-        }   # TODO gt_box_batch is here only for rpn anchor layer's required parameter,
-            # which is unused in the inferences, and should be removed later
+            gt_box_batch  : gt_box_val,
+        }
 
         bbox_pred, score = sess.run([rpn_bbox_pred, rpn_cls_score], feed_dict=feed_dict)
 
