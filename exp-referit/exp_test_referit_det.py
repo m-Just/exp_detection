@@ -53,7 +53,7 @@ gt_box_batch = np.zeros((N, 5), dtype=np.float32)   # (x1, y1, x2, y2, cls)
 # Outputs
 net = segmodel.text_objseg_region(text_seq_batch, imcrop_batch, imsize_batch,
     gt_box_batch, num_vocab, embed_dim, lstm_dim, rpn_feat_dim,
-    mlp_dropout=mlp_dropout, is_training=is_bn_training)
+    is_training=is_bn_training)
 
 # Load pretrained model
 snapshot_saver = tf.train.Saver()

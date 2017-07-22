@@ -44,8 +44,6 @@ max_iter = 60000
 deeplab_lr_mult = 0.1
 
 fix_convnet = True
-vgg_dropout = False
-mlp_dropout = False
 vgg_lr_mult = 1.
 
 # Data Params
@@ -93,7 +91,7 @@ gt_box_batch = tf.placeholder(tf.float32, [N, 5])
 # Outputs
 net = segmodel.text_objseg_region(text_seq_batch, imcrop_batch, imsize_batch,
     gt_box_batch, num_vocab, embed_dim, lstm_dim, rpn_feat_dim,
-    mlp_dropout=mlp_dropout, is_training=is_bn_training)
+    is_training=is_bn_training)
 
 ################################################################################
 # Collect trainable variables, regularized variables and learning rates
