@@ -251,8 +251,9 @@ for n_iter in range(args.max_iter):
     print('\titer = %d, rpn_loss (cur) = %f, rpn_loss (avg) = %f, lr = %f'
         % (n_iter, rpn_loss_val, rpn_loss_avg, lr_val))
 
-    print(label)
-    print(score)
+    # print(label)
+    # print(score)
+    print(tf.nn.softmax_cross_entropy_with_logits(labels=label, logits=score).eval(session=sess))
     # pos_label = np.ones((len(label), 1))
     # print(pos_label)
     # print(score)
