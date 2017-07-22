@@ -269,13 +269,14 @@ for n_iter in range(args.max_iter):
     pos_accuracy = float(len(true_pos)) / len(pos_sample)
     neg_accuracy = float(len(true_neg)) / len(neg_sample)
 
+
+    print('\taccuracy (all) = %f, accuracy (pos) = %f, accuracy (neg) = %f'
+          % (accuracy, pos_accuracy, neg_accuracy))
     print(pos_sample)
     print(top_pred)
     print(true_pos)
     print('#pos = %d' % len(pos_sample))
     print('#TP = %d' % len(true_pos))
-    print('\taccuracy (all) = %f, accuracy (pos) = %f, accuracy (neg) = %f'
-          % (accuracy, pos_accuracy, neg_accuracy))
 
     # Save snapshot
     if (n_iter+1) % snapshot == 0 or (n_iter+1) == args.max_iter:
