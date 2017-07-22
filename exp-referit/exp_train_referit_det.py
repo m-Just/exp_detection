@@ -252,7 +252,7 @@ for n_iter in range(args.max_iter):
         % (n_iter, rpn_loss_val, rpn_loss_avg, lr_val))
 
 
-    pos_label = tf.transpose(np.ones(len(label)))
+    pos_label = np.ones(len(label))
     print(pos_label)
     print(score)
     pos_loss = tf.nn.softmax_cross_entropy_with_logits(labels=pos_label, logits=score)
