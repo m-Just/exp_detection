@@ -10,6 +10,7 @@ from networks import text_objseg_model as segmodel
 from utils import data_reader
 from utils import loss
 from utils import rcnn
+from utils import text_processing
 
 ################################################################################
 # Parameters
@@ -216,6 +217,9 @@ with tf.name_scope('summaries'):
 merged = tf.summary.merge_all()
 train_writer = tf.summary.FileWriter('tf_logs/train')
 
+vocab_file = './exp-referit/data/vocabulary_referit.txt'
+vocab_dict = text_processing.load_vocab_dict_from_file(vocab_file)
+
 for n_iter in range(args.max_iter):
     # Read one batch
     batch = reader.read_batch()
@@ -265,6 +269,13 @@ for n_iter in range(args.max_iter):
     avg_accuracy_all = decay*avg_accuracy_all + (1-decay)*accuracy
     avg_accuracy_pos = decay*avg_accuracy_pos + (1-decay)*pos_accuracy
     avg_accuracy_neg = decay*avg_accuracy_neg + (1-decay)*neg_accuracy
+
+    for text in text_seq_val:
+        if text[0] > 0:
+            print(vocab_dict.keys()[vocab_dict.values().index(text[0])], end=' ')
+    print('')
+    #print(text_seq_val)
+
 
     print('\titer = %d, rpn_loss (cur) = %f, rpn_loss (avg) = %f, lr = %f'
         % (n_iter, rpn_loss_val, rpn_loss_avg, lr_val))
