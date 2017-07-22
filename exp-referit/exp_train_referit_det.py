@@ -238,8 +238,8 @@ for n_iter in range(args.max_iter):
     }
 
     # Forward and Backward pass
-    summary, rpn_cls_pred, label, rpn_cross_entropy_val, rpn_loss_box_val, _, lr_val = \
-    sess.run([merged, rpn_cls_elem_loss, rpn_label, 
+    summary, rpn_cls_pred, score, label, rpn_cross_entropy_val, rpn_loss_box_val, _, lr_val = \
+    sess.run([merged, rpn_cls_elem_loss, rpn_cls_score, rpn_label,
         rpn_cross_entropy, rpn_loss_box, train_step, learning_rate],
         feed_dict=feed_dict)
 
@@ -251,7 +251,12 @@ for n_iter in range(args.max_iter):
     print('\titer = %d, rpn_loss (cur) = %f, rpn_loss (avg) = %f, lr = %f'
         % (n_iter, rpn_loss_val, rpn_loss_avg, lr_val))
 
+    pos_label = np.ones(len(label))
+    pos_loss = tf.nn.softmax_cross_entropy_with_logits(labels=pos_label, logits=score)
+    print(pos_loss.eval(session=sess))
+
     # TODO Accuracy
+    assert len(label) == len(rpn_cls_pred)
     pos_sample = np.where(label == 1)[0]
     neg_sample = np.where(label == 0)[0]
     predictions = np.argsort(rpn_cls_pred)
@@ -262,7 +267,7 @@ for n_iter in range(args.max_iter):
     accuracy = float(len(true_pos) + len(true_neg)) / len(label)
     pos_accuracy = float(len(true_pos)) / len(pos_sample)
     neg_accuracy = float(len(true_neg)) / len(neg_sample)
-    print('\taccuracy (overall) = %f, accuracy (pos) = %f, accuracy (neg) = %f'
+    print('\taccuracy (all) = %f, accuracy (pos) = %f, accuracy (neg) = %f'
           % (accuracy, pos_accuracy, neg_accuracy))
 
     # Save snapshot
