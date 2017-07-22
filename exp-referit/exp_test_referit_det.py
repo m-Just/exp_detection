@@ -97,6 +97,8 @@ eval_bbox_num_list = [1, 10, 100]
 bbox_correct = np.zeros(len(eval_bbox_num_list), dtype=np.int32)
 bbox_total = 0
 
+# Pre-allocate arrays
+imcrop_val = np.zeros((N, 224, 224, 3), dtype=np.float32)
 text_seq_val = np.zeros((T, 1), dtype=np.int32)
 
 num_im = len(imlist)
@@ -110,7 +112,7 @@ for n_im in range(num_im):
     processed_im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))
     if processed_im.ndim == 2:
         processed_im = processed_im[:, :, np.newaxis]
-    imcrop_val = processed_im[..., ::-1] - segmodel.IMG_MEAN
+    imcrop_val[0, ...] = processed_im[..., ::-1] - segmodel.IMG_MEAN
 
     # Extract textual features from sentences
     for imcrop_name, gt_bbox, description in flat_query_dict[imname]:
