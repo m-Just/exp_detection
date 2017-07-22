@@ -135,7 +135,7 @@ for n_im in range(num_im):
         pos_label = np.ones(len(bbox_pred), dtype=np.int32)
         pos_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
             labels=pos_label, logits=score).eval(session=sess)
-        predictions = np.argsort(pos_loss)
+        predictions = np.argsort(pos_loss)[0]   # top 1
 
         for i in predictions:
             print(bbox_pred[i])
