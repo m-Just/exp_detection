@@ -100,13 +100,14 @@ bbox_total = 0
 # Pre-allocate arrays
 imcrop_val = np.zeros((N, input_H, input_W, 3), dtype=np.float32)
 text_seq_val = np.zeros((T, 1), dtype=np.int32)
+imsize_val = np.zeros((N, 2), dtype=np.float32)
 gt_box_val = np.zeros((N, 5), dtype=np.float32)
 
 num_im = len(imlist)
 for n_im in range(num_im):
     print('testing image %d / %d' % (n_im, num_im))
     imname = imlist[n_im]
-    imsize_val = imsize_dict[imname]
+    imsize_val[0, ...] = imsize_dict[imname]
 
     # Extract visual features from image
     im = skimage.io.imread(image_dir + imname)
