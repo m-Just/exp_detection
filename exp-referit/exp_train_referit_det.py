@@ -252,6 +252,7 @@ for n_iter in range(args.max_iter):
         % (n_iter, rpn_loss_val, rpn_loss_avg, lr_val))
 
     print(label)
+    print(score)
     # pos_label = np.ones((len(label), 1))
     # print(pos_label)
     # print(score)
