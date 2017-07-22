@@ -98,14 +98,14 @@ for n_batch in range(num_batch):
         im = skimage.io.imread(image_dir + imname)
         xmin, ymin, xmax, ymax = sample_bbox[0]
 
-        imcrop = im[ymin:ymax+1, xmin:xmax+1, :]
-        imcrop = skimage.img_as_ubyte(skimage.transform.resize(imcrop, [input_H, input_W]))
-        spatial_feat = processing_tools.spatial_feature_from_bbox(sample_bbox, imsize)
+        processed_im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))
+        if processed_im.ndim == 2:
+            processed_im = processed_im[:, :, np.newaxis]
         text_seq = text_processing.preprocess_sentence(description, vocab_dict, T)
 
         idx = n_sample - batch_begin
         text_seq_batch[:, idx] = text_seq
-        imcrop_batch[idx, ...] = imcrop
+        imcrop_batch[idx, ...] = processed_im
         imsize_batch[idx, ...] = np.array(imsize[::-1], dtype=np.float32) # result size format is height x width
         gt_box_batch[idx, ...] = np.array([xmin, ymin, xmax, ymax, 1], dtype=np.float32)
             # TODO here labels = 1 or 0 (object or non-object)
