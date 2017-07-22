@@ -269,14 +269,19 @@ for n_iter in range(args.max_iter):
     pos_accuracy = float(len(true_pos)) / len(pos_sample)
     neg_accuracy = float(len(true_neg)) / len(neg_sample)
 
+    avg_accuracy_all = decay*avg_accuracy_all + (1-decay)*accuracy
+    avg_accuracy_pos = decay*avg_accuracy_pos + (1-decay)*pos_accuracy
+    avg_accuracy_neg = decay*avg_accuracy_neg + (1-decay)*neg_accuracy
+    print('\titer = %d, accuracy (cur) = %f (all), %f (pos), %f (neg)'
+          % (n_iter, accuracy, pos_accuracy, neg_accuracy))
+    print('\titer = %d, accuracy (avg) = %f (all), %f (pos), %f (neg)'
+          % (n_iter, avg_accuracy_all, avg_accuracy_pos, avg_accuracy_neg))
 
-    print('\taccuracy (all) = %f, accuracy (pos) = %f, accuracy (neg) = %f'
-          % (accuracy, pos_accuracy, neg_accuracy))
-    print(pos_sample)
-    print(top_pred)
-    print(true_pos)
-    print('#pos = %d' % len(pos_sample))
-    print('#TP = %d' % len(true_pos))
+    # print(pos_sample)
+    # print(top_pred)
+    # print(true_pos)
+    # print('#pos = %d' % len(pos_sample))
+    # print('#TP = %d' % len(true_pos))
 
     # Save snapshot
     if (n_iter+1) % snapshot == 0 or (n_iter+1) == args.max_iter:
