@@ -9,7 +9,7 @@ import json
 import timeit
 
 from networks import text_objseg_model as segmodel
-from util import im_processing, text_processing, eval_tools
+from utils import im_processing, text_processing, eval_tools
 
 ################################################################################
 # Parameters
