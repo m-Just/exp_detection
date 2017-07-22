@@ -23,7 +23,7 @@ imcrop_file = './exp-referit/data/referit_imcrop.json'
 imsize_file = './exp-referit/data/referit_imsize.json'
 vocab_file = './exp-referit/data/vocabulary_referit.txt'
 
-pretrained_model = './exp-referit/tfmodel/referit_fc8_det_iter_60000.tfmodel'
+pretrained_model = './exp-referit/tfmodel/referit_rpn_det_iter_60000.tfmodel'
 
 # Model Params
 T = 20
